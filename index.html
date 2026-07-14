@@ -1,220 +1,642 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>leboncoin mini</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leboncoin Mini - Version Complète</title>
+    <!-- Tailwind CSS pour un joli design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #ffffff; padding-bottom: 80px;">
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans pb-20"> <!-- pb-20 pour ne pas que la barre du bas cache le contenu -->
 
-  <!-- ==================== 1. ÉCRAN DE BIENVENUE ==================== -->
-  <div id="ecran-bienvenue" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <h1 style="color: orange; font-size: 32px; margin-bottom: 5px;">leboncoin</h1>
-    <h2 style="color: orange; margin-top: 0; font-size: 18px; margin-bottom: 30px;">mini</h2>
-    <input type="text" id="saisie-prenom" placeholder="Quel est ton prénom ?" style="background-color: #f4f6f8; border: none; border-radius: 20px; padding: 15px; width: 80%; max-width: 300px; text-align: center; font-size: 16px; margin-bottom: 20px; outline: none;">
-    <button onclick="validerPrenom()" style="background-color: orange; color: white; border: none; border-radius: 20px; padding: 12px 30px; font-weight: bold; font-size: 16px; cursor: pointer;">Continuer</button>
-  </div>
-
-  <!-- ==================== 2. FORMULAIRE DE CRÉATION D'ANNONCE ==================== -->
-  <div id="formulaire-annonce" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 999; box-sizing: border-box; padding: 20px; overflow-y: auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="color: #1a2028; margin: 0;">Déposer une annonce</h2>
-      <button onclick="fermerFormulaire()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">✕</button>
+    <!-- Écran de Connexion (Prénom) -->
+    <div id="auth-screen" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+            <h1 class="text-3xl font-extrabold text-orange-500 mb-2">leboncoin <span class="text-gray-700">mini</span></h1>
+            <p class="text-gray-500 mb-6">Entre ton prénom pour commencer à jouer !</p>
+            <input type="text" id="username-input" placeholder="Ton prénom" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4 text-center text-lg">
+            <button onclick="saveUsername()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition duration-200 text-lg shadow-md">Rejoindre le jeu</button>
+        </div>
     </div>
-    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Titre de l'annonce</label>
-    <input type="text" id="titre-annonce" placeholder="Ex: Vélo rouge VTT" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
-    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Prix (€)</label>
-    <input type="number" id="prix-annonce" placeholder="Ex: 45" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
-    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Ajouter une photo</label>
-    <input type="file" id="photo-annonce" accept="image/*" style="width: 100%; padding: 10px 0; margin-bottom: 15px; box-sizing: border-box;">
-    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Description</label>
-    <textarea id="desc-annonce" placeholder="Décris ton objet..." rows="4" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; font-family: sans-serif;"></textarea>
-    <button onclick="creerAnnonce()" style="width: 100%; background-color: orange; color: white; border: none; border-radius: 8px; padding: 15px; font-weight: bold; font-size: 16px; cursor: pointer;">Publier mon annonce</button>
-  </div>
 
-  <!-- ==================== 3. PAGE DÉTAIL D'UNE ANNONCE ==================== -->
-  <div id="page-detail" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 998; box-sizing: border-box; padding: 20px; overflow-y: auto;">
-    <button onclick="fermerDetail()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #1a2028; margin-bottom: 15px; font-weight: bold;">← Retour</button>
-    <div id="detail-contenu"></div>
-  </div>
+    <!-- Écran Principal de l'Application -->
+    <div id="app-screen" class="hidden flex-col flex-grow">
+        <!-- Header du haut -->
+        <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+            <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-black text-orange-500 cursor-pointer" onclick="showSection('feed')">leboncoin</h1>
+                <div class="flex items-center gap-4">
+                    <!-- Petite photo de profil dynamique dans le header -->
+                    <img id="header-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="w-8 h-8 rounded-full object-cover border border-orange-500" onclick="showSection('profile')">
+                    <span id="user-display" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-bold text-sm"></span>
+                    <button onclick="logout()" class="text-xs text-gray-500 hover:text-red-500">Quitter</button>
+                </div>
+            </div>
+        </header>
 
-  <!-- ==================== 4. ONGLETS DE NAVIGATION ==================== -->
-  
-  <div id="page-favoris" style="display: none; padding: 20px 15px; margin-bottom: 60px;">
-    <h2 style="color: #1a2028; margin-top: 0;">Mes Favoris ❤️</h2>
-    <div id="liste-favoris" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-      <p style="grid-column: span 2; color: #888; text-align: center; margin-top: 40px;">Tu n'as pas encore de favoris.</p>
+        <!-- Contenu de l'application -->
+        <main class="flex-grow max-w-4xl w-full mx-auto p-4">
+            
+            <!-- SECTION 1 : ACCUEIL / FIL D'ANNONCES -->
+            <div id="section-feed" class="space-y-4">
+                <div id="annonces-list" class="grid gap-4 md:grid-cols-2">
+                    <!-- Les annonces s'afficheront ici dynamiquement -->
+                </div>
+                <div id="no-annonces" class="text-center py-12 text-gray-500 hidden">
+                    Aucune annonce en ligne pour l'instant. Sois le premier à en ajouter une !
+                </div>
+            </div>
+
+            <!-- SECTION 2 : CRÉER UNE ANNONCE -->
+            <div id="section-create" class="hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Déposer une annonce</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Titre de l'objet</label>
+                        <input type="text" id="add-titre" placeholder="Ex: Vélo rouge vintage" class="w-full px-3 py-2 border rounded-lg focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Prix (€)</label>
+                        <input type="number" id="add-prix" placeholder="Ex: 45" class="w-full px-3 py-2 border rounded-lg focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Lien d'une image (Optionnel)</label>
+                        <input type="text" id="add-img" placeholder="https://exemple.com/image.jpg" class="w-full px-3 py-2 border rounded-lg focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
+                        <textarea id="add-desc" rows="3" placeholder="Décris ton objet..." class="w-full px-3 py-2 border rounded-lg focus:outline-none"></textarea>
+                    </div>
+                    <button onclick="publierAnnonce()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-md transition">Publier mon annonce</button>
+                </div>
+            </div>
+
+            <!-- SECTION 3 : FAVORIS -->
+            <div id="section-fav" class="hidden space-y-4">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Mes favoris ⭐</h2>
+                <div id="fav-list" class="grid gap-4 md:grid-cols-2">
+                    <!-- Les favoris s'afficheront ici -->
+                </div>
+                <div id="no-fav" class="text-center py-12 text-gray-500 hidden">
+                    Tu n'as pas encore d'annonces en favoris.
+                </div>
+            </div>
+
+            <!-- SECTION 4 : DISCUSSION CHAT (INDIVIDUELLE) -->
+            <div id="section-chat" class="hidden flex flex-col bg-white rounded-xl shadow-md overflow-hidden max-w-lg mx-auto h-[450px]">
+                <div class="bg-orange-500 text-white p-4 flex justify-between items-center">
+                    <div>
+                        <h3 id="chat-title" class="font-bold">Discuter</h3>
+                        <p id="chat-item" class="text-xs text-orange-100"></p>
+                    </div>
+                    <button onclick="showSection('feed')" class="text-white hover:text-gray-200 font-bold text-sm">Retour</button>
+                </div>
+                <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm">
+                    <!-- Messages -->
+                </div>
+                <div class="p-3 border-t bg-white flex gap-2">
+                    <input type="text" id="chat-input" placeholder="Écris ton message..." class="flex-grow px-3 py-2 border rounded-lg focus:outline-none">
+                    <button onclick="envoyerMessage()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold">Envoyer</button>
+                </div>
+            </div>
+
+            <!-- SECTION 5 : BOÎTE DE RÉCEPTION (LISTE DES MESSAGES) -->
+            <div id="section-inbox" class="hidden space-y-4 max-w-lg mx-auto">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Mes Discussions 💬</h2>
+                <div id="inbox-list" class="space-y-3">
+                    <!-- Liste des discussions -->
+                </div>
+                <div id="no-messages" class="text-center py-12 text-gray-500 hidden">
+                    Tu n'as pas encore de discussion en cours.
+                </div>
+            </div>
+
+            <!-- SECTION 6 : MON COMPTE / PROFIL -->
+            <div id="section-profile" class="hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow-md text-center">
+                <h2 class="text-xl font-bold mb-6 text-gray-800">Mon Profil 👤</h2>
+                <div class="flex flex-col items-center mb-6">
+                    <img id="profile-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="w-24 h-24 rounded-full object-cover border-4 border-orange-500 shadow-md mb-4" alt="Photo de profil">
+                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800">Prénom</h3>
+                </div>
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Lien de ta photo de profil (URL)</label>
+                        <input type="text" id="avatar-input" placeholder="https://exemple.com/ma-photo.jpg" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <button onclick="saveProfile()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg shadow transition">Enregistrer ma photo</button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BARRE DE NAVIGATION FIXE EN BAS (Style Leboncoin) -->
+        <nav class="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-50 shadow-lg">
+            <div class="max-w-4xl mx-auto flex justify-around text-center py-2">
+                <!-- Accueil -->
+                <button id="nav-feed" onclick="showSection('feed')" class="flex flex-col items-center flex-1 text-orange-500">
+                    <span class="text-xl">🏠</span>
+                    <span class="text-[10px] font-bold">Accueil</span>
+                </button>
+                <!-- Favoris -->
+                <button id="nav-fav" onclick="showSection('fav')" class="flex flex-col items-center flex-1 text-gray-500">
+                    <span class="text-xl">⭐</span>
+                    <span class="text-[10px] font-bold">Favoris</span>
+                </button>
+                <!-- Publier -->
+                <button id="nav-create" onclick="showSection('create')" class="flex flex-col items-center flex-1 text-gray-500">
+                    <span class="text-xl">➕</span>
+                    <span class="text-[10px] font-bold">Publier</span>
+                </button>
+                <!-- Messages -->
+                <button id="nav-inbox" onclick="showSection('inbox')" class="flex flex-col items-center flex-1 text-gray-500">
+                    <span class="text-xl">💬</span>
+                    <span class="text-[10px] font-bold">Messages</span>
+                </button>
+                <!-- Mon Compte -->
+                <button id="nav-profile" onclick="showSection('profile')" class="flex flex-col items-center flex-1 text-gray-500">
+                    <span class="text-xl">👤</span>
+                    <span class="text-[10px] font-bold">Compte</span>
+                </button>
+            </div>
+        </nav>
     </div>
-  </div>
 
-  <div id="page-messages" style="display: none; padding: 20px 15px; margin-bottom: 60px; height: calc(100vh - 120px); display: flex; flex-direction: column; box-sizing: border-box;">
-    <h2 style="color: #1a2028; margin-top: 0; margin-bottom: 10px;">Messages en direct 💬</h2>
-    <div id="zone-discussions" style="flex: 1; overflow-y: auto; background-color: #f4f6f8; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;">
-      <p id="msg-aucune-disc" style="color: #888; text-align: center; margin-top: 40px;">Choisis une annonce et clique sur "Discuter en réel avec le vendeur" pour lui envoyer un message.</p>
-    </div>
-    <div id="bloc-envoi-message" style="display: none; gap: 8px;">
-      <input type="text" id="texte-message" placeholder="Ton message..." style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none;">
-      <button onclick="envoyerMessageReel()" style="background-color: orange; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-weight: bold; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">➔</button>
-    </div>
-  </div>
+    <!-- Ici commencera la balise script de la partie 2 -->
 
-  <div id="page-resultats-recherche" style="display: none; padding: 20px 15px; margin-bottom: 60px;">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-      <button onclick="fermerRecherche()" style="background: none; border: none; font-size: 16px; cursor: pointer; color: orange; font-weight: bold;">← Accueil</button>
-      <h3 style="margin: 0; color: #1a2028;">Résultats de recherche</h3>
-    </div>
-    <div id="liste-resultats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
-  </div>
+<!-- ========================================= -->
+    <!-- PARTIE 2 : LOGIQUE ET BASE DE DONNÉES -->
+    <!-- ========================================= -->
+    <script>
+        // --- CONNEXION SUPABASE ---
+        const SUPABASE_URL = "https://ilqlsizyoxnktlhrdofv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_n5ccYB8_CsCvjoUhduKxDQ_0nnDp9g7mR3f_E_YQ-gA"; // Ta clé publique active
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  <div id="page-accueil">
-    <h1 style="text-align: center; color: orange; margin-bottom: 0;">leboncoin</h1>
-    <h2 style="text-align: center; color: orange; margin-top: 0; font-size: 14px; letter-spacing: 2px;">mini</h2>
+        let currentUser = localStorage.getItem("username") || "";
+        let currentAnnonceId = null;
+        let messagesSubscription = null;
+        let userFavorisIds = [];
 
-    <input type="text" id="barre-recherche" onkeypress="verifierEntreeRecherche(event)" placeholder="🔍 Rechercher (Appuie sur Entrée)..." style="background-color: #f4f6f8; border: none; border-radius: 20px; padding: 15px; width: 90%; display: block; margin: 20px auto; font-size: 16px; box-sizing: border-box; outline: none;">
+        // Démarrage de l'application au chargement de la page
+        window.onload = async () => {
+            if (currentUser) {
+                await showApp();
+            } else {
+                showAuth();
+            }
+        };
 
-    <div style="padding: 0 15px;">
-      <h3 style="color: #1a2028; margin-bottom: 15px;">Annonces récentes</h3>
-      <div id="liste-annonces" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
-    </div>
-  </div>
+        function showAuth() {
+            document.getElementById("auth-screen").classList.remove("hidden");
+            document.getElementById("app-screen").classList.add("hidden");
+        }
 
-  <!-- BARRE DE NAVIGATION -->
-  <div style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background-color: white; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); z-index: 990;">
-    <div onclick="changerOnglet('accueil')" style="text-align: center; color: #1a2028; cursor: pointer;">
-      <div style="font-size: 18px;">🔍</div>
-      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">Rechercher</div>
-    </div>
-    <div onclick="changerOnglet('favoris')" style="text-align: center; color: #1a2028; cursor: pointer;">
-      <div style="font-size: 18px;">❤️</div>
-      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">Favoris</div>
-    </div>
-    <div onclick="ouvrirFormulaire()" style="text-align: center; color: #1a2028; cursor: pointer;">
-      <div style="width: 22px; height: 22px; border: 2px solid #1a2028; border-radius: 6px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;">+</div>
-      <div style="font-size: 10px; font-weight: bold; margin-top: 3px;">Publier</div>
-    </div>
-    <div onclick="changerOnglet('messages')" style="text-align: center; color: #1a2028; cursor: pointer;">
-      <div style="font-size: 18px;">💬</div>
-      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">Messages</div>
-    </div>
-    <div style="text-align: center; color: #1a2028; cursor: pointer;">
-      <div id="lettre-profil" style="width: 20px; height: 20px; background-color: #00838f; color: white; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">?</div>
-      <div style="font-size: 10px; font-weight: bold; margin-top: 3px;">Compte</div>
-    </div>
-  </div>
+        async function showApp() {
+            document.getElementById("auth-screen").classList.add("hidden");
+            document.getElementById("app-screen").classList.remove("hidden");
+            document.getElementById("user-display").innerText = currentUser;
+            
+            // Charger la photo de profil dans le header
+            loadProfileData();
+            
+            // Récupérer les favoris en tâche de fond et afficher l'accueil
+            await fetchFavorisIds();
+            showSection('feed');
+        }
 
-  <script>
-    const TOPIC_NAME = "leboncoin_mini_chat_9973"; 
-    var prenomUtilisateur = "Anonyme";
-    var baseAnnonces = [];
-    var favorisIds = [];
-    var destinataireActuel = "";
-    var sourceEvenements = null;
+        function saveUsername() {
+            const input = document.getElementById("username-input").value.trim();
+            if (input) {
+                currentUser = input;
+                localStorage.setItem("username", currentUser);
+                showApp();
+            }
+        }
 
-    function validerPrenom() {
-      var prenom = document.getElementById("saisie-prenom").value.trim();
-      if (prenom === "") { alert("Entre ton prénom !"); return; }
-      prenomUtilisateur = prenom;
-      document.getElementById("lettre-profil").innerText = prenom.charAt(0).toUpperCase();
-      document.getElementById("ecran-bienvenue").style.display = "none";
-      changerOnglet('accueil');
-      connecterMessagerieLive();
-    }
+        function logout() {
+            localStorage.removeItem("username");
+            currentUser = "";
+            showAuth();
+        }
 
-    function connecterMessagerieLive() {
-      sourceEvenements = new EventSource(`https://ntfy.sh/${TOPIC_NAME}/sse`);
-      sourceEvenements.onmessage = function(event) {
-        try {
-          var donneesBrutes = JSON.parse(event.data);
-          var messageObj = JSON.parse(donneesBrutes.message);
-          recevoirMessage(messageObj);
-        } catch(e) {}
-      };
-    }
+        // --- GESTION DE LA NAVIGATION (Changement de sections) ---
+        function showSection(section) {
+            // Masquer absolument toutes les fenêtres de contenu
+            document.getElementById("section-feed").classList.add("hidden");
+            document.getElementById("section-create").classList.add("hidden");
+            document.getElementById("section-chat").classList.add("hidden");
+            document.getElementById("section-fav").classList.add("hidden");
+            document.getElementById("section-inbox").classList.add("hidden");
+            document.getElementById("section-profile").classList.add("hidden");
 
-    function envoyerMessageReel() {
-      var input = document.getElementById("texte-message");
-      if (input.value.trim() === "") return;
-      fetch(`https://ntfy.sh/${TOPIC_NAME}`, {
-        method: 'POST',
-        body: JSON.stringify({ expediteur: prenomUtilisateur, destinataire: destinataireActuel, texte: input.value.trim() })
-      });
-      input.value = "";
-    }
+            // Réinitialiser la couleur de tous les boutons de la barre du bas
+            const tabs = ['feed', 'fav', 'create', 'inbox', 'profile'];
+            tabs.forEach(tab => {
+                const btn = document.getElementById(`nav-${tab}`);
+                if (btn) {
+                    btn.classList.remove("text-orange-500");
+                    btn.classList.add("text-gray-500");
+                }
+            });
 
-    function recevoirMessage(payload) {
-      if ((payload.expediteur === prenomUtilisateur && payload.destinataire === destinataireActuel) ||
-          (payload.expediteur === destinataireActuel && payload.destinataire === prenomUtilisateur)) {
-        var zone = document.getElementById("zone-discussions");
-        var msgDefaut = document.getElementById("msg-aucune-disc");
-        if (msgDefaut) msgDefaut.style.display = "none";
-        var bulleHTML = (payload.expediteur === prenomUtilisateur) ? 
-          `<div style="align-self: flex-end; background-color: #00838f; color: white; padding: 10px 14px; border-radius: 15px 15px 0 15px; max-width: 75%; font-size: 14px;">${payload.texte}</div>` : 
-          `<div style="align-self: flex-start; background-color: white; color: #1a2028; padding: 10px 14px; border-radius: 15px 15px 15px 0; max-width: 75%; font-size: 14px; border: 1px solid #e0e0e0;"><strong style="font-size: 10px; color: #00838f; display: block;">${payload.expediteur}</strong>${payload.texte}</div>`;
-        zone.insertAdjacentHTML('beforeend', bulleHTML);
-        zone.scrollTop = zone.scrollHeight;
-      }
-    }
+            // Afficher la section demandée
+            document.getElementById(`section-${section}`).classList.remove("hidden");
 
-    function ouvrirMessagerieReelle(nomDestinataire) {
-      if (nomDestinataire === prenomUtilisateur) { alert("Tu ne peux pas te parler à toi-même !"); return; }
-      destinataireActuel = nomDestinataire;
-      fermerDetail();
-      changerOnglet('messages');
-      var zone = document.getElementById("zone-discussions");
-      zone.innerHTML = `<p style="color: #888; text-align: center; font-size: 12px;">Discussion avec <strong>${nomDestinataire}</strong></p>`;
-      document.getElementById("bloc-envoi-message").style.display = "flex";
-    }
+            // Mettre en orange le bouton actif
+            const activeBtn = document.getElementById(`nav-${section}`);
+            if (activeBtn) {
+                activeBtn.classList.remove("text-gray-500");
+                activeBtn.classList.add("text-orange-500");
+            }
 
-    function ouvrirFormulaire() { document.getElementById("formulaire-annonce").style.display = "block"; }
-    function fermerFormulaire() { document.getElementById("formulaire-annonce").style.display = "none"; }
+            // Lancer les rechargements de données requis pour chaque section
+            if (section === 'feed') {
+                loadAnnonces();
+            } else if (section === 'fav') {
+                loadFavoris();
+            } else if (section === 'inbox') {
+                loadDiscussions();
+            } else if (section === 'profile') {
+                loadProfileData();
+            }
+        }
 
-    function creerAnnonce() {
-      var titre = document.getElementById("titre-annonce").value;
-      var prix = document.getElementById("prix-annonce").value;
-      var desc = document.getElementById("desc-annonce").value;
-      if (titre === "" || prix === "" || desc === "") { alert("Remplis tout !"); return; }
-      var nouvelleAnnonce = { id: "ann_" + Date.now(), titre, prix, desc, auteur: prenomUtilisateur, photo: "" };
-      var photoInput = document.getElementById("photo-annonce");
-      if (photoInput.files && photoInput.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) { nouvelleAnnonce.photo = e.target.result; enregistrerEtAfficher(nouvelleAnnonce); }
-        reader.readAsDataURL(photoInput.files[0]);
-      } else { enregistrerEtAfficher(nouvelleAnnonce); }
-    }
+        // --- FONCTIONS PROFIL (COMPTE) ---
+        function loadProfileData() {
+            document.getElementById("profile-name").innerText = currentUser;
+            const storedAvatar = localStorage.getItem(`avatar_${currentUser}`);
+            
+            // Liste d'avatars par défaut sympa si vide
+            const defaultAvatar = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+            
+            if (storedAvatar) {
+                document.getElementById("profile-avatar").src = storedAvatar;
+                document.getElementById("header-avatar").src = storedAvatar;
+                document.getElementById("avatar-input").value = storedAvatar;
+            } else {
+                document.getElementById("profile-avatar").src = defaultAvatar;
+                document.getElementById("header-avatar").src = defaultAvatar;
+                document.getElementById("avatar-input").value = "";
+            }
+        }
 
-    function enregistrerEtAfficher(annonce) {
-      baseAnnonces.unshift(annonce);
-      genererGrilleAnnonces("liste-annonces", baseAnnonces);
-      document.getElementById("titre-annonce").value = "";
-      document.getElementById("prix-annonce").value = "";
-      document.getElementById("desc-annonce").value = "";
-      fermerFormulaire();
-    }
+        function saveProfile() {
+            const avatarUrl = document.getElementById("avatar-input").value.trim();
+            if (avatarUrl) {
+                localStorage.setItem(`avatar_${currentUser}`, avatarUrl);
+                document.getElementById("profile-avatar").src = avatarUrl;
+                document.getElementById("header-avatar").src = avatarUrl;
+                alert("Ta photo de profil a bien été mise à jour ! 🎉");
+            } else {
+                localStorage.removeItem(`avatar_${currentUser}`);
+                loadProfileData();
+                alert("Photo de profil réinitialisée.");
+            }
+        }
 
-    function genererGrilleAnnonces(elementId, listeDonnees) {
-      var conteneur = document.getElementById(elementId);
-      conteneur.innerHTML = (listeDonnees.length === 0) ? '<p style="grid-column: span 2; color: #888; text-align: center; margin-top: 40px;">Aucune annonce pour le moment.</p>' : "";
-      listeDonnees.forEach(function(a) {
-        var imgHTML = a.photo ? `<img src="${a.photo}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px;">` : `<div style="width: 100%; height: 110px; background-color: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center;">📦</div>`;
-        conteneur.insertAdjacentHTML('beforeend', `<div onclick="ouvrirDetail('${a.id}')" style="background-color: #f4f6f8; padding: 10px; border-radius: 12px; cursor: pointer;">${imgHTML}<h4 style="margin: 8px 0;">${a.titre}</h4><p style="color: orange; font-weight:bold;">${a.prix} €</p></div>`);
-      });
-    }
+        // --- FONCTIONS FAVORIS (Cloud) ---
+        async function fetchFavorisIds() {
+            const { data, error } = await supabase
+                .from('favoris')
+                .select('annonce_id')
+                .eq('username', currentUser);
+            if (!error && data) {
+                userFavorisIds = data.map(f => f.annonce_id);
+            }
+        }
 
-    function ouvrirDetail(id) {
-      var a = baseAnnonces.find(a => a.id === id);
-      document.getElementById("detail-contenu").innerHTML = `<h1>${a.titre}</h1><h2 style="color:orange;">${a.prix} €</h2><p>${a.desc}</p><button onclick="ouvrirMessagerieReelle('${a.auteur}')" style="width:100%; background:orange; color:white; border:none; padding:15px; border-radius:8px;">Contacter le vendeur</button>`;
-      document.getElementById("page-detail").style.display = "block";
-    }
+        async function toggleFavori(annonceId) {
+            await fetchFavorisIds();
+            const index = userFavorisIds.indexOf(annonceId);
+            
+            if (index > -1) {
+                // Déjà en favoris -> on le supprime
+                const { error } = await supabase
+                    .from('favoris')
+                    .delete()
+                    .eq('username', currentUser)
+                    .eq('annonce_id', annonceId);
+                
+                if (!error) {
+                    userFavorisIds.splice(index, 1);
+                }
+            } else {
+                // Pas en favoris -> on l'ajoute
+                const { error } = await supabase
+                    .from('favoris')
+                    .insert([{ username: currentUser, annonce_id: annonceId }]);
+                
+                if (!error) {
+                    userFavorisIds.push(annonceId);
+                }
+            }
+            
+            // On rafraîchit l'affichage de la section active
+            if (!document.getElementById("section-feed").classList.contains("hidden")) {
+                loadAnnonces();
+            } else if (!document.getElementById("section-fav").classList.contains("hidden")) {
+                loadFavoris();
+            }
+        }
 
-    function fermerDetail() { document.getElementById("page-detail").style.display = "none"; }
-    function changerOnglet(onglet) {
-      document.getElementById("page-accueil").style.display = (onglet === 'accueil') ? "block" : "none";
-      document.getElementById("page-favoris").style.display = (onglet === 'favoris') ? "block" : "none";
-      document.getElementById("page-messages").style.display = (onglet === 'messages') ? "flex" : "none";
-    }
-    function verifierEntreeRecherche(e) { if(e.key === "Enter") { /* logique simplifiée */ } }
-    function fermerRecherche() { document.getElementById("page-resultats-recherche").style.display = "none"; document.getElementById("page-accueil").style.display = "block"; }
-  </script>
+        async function loadFavoris() {
+            await fetchFavorisIds();
+            const listDiv = document.getElementById("fav-list");
+            const noFavDiv = document.getElementById("no-fav");
+            listDiv.innerHTML = "<p class='text-center text-gray-500 col-span-2 py-8'>Chargement de tes favoris...</p>";
+
+            if (userFavorisIds.length === 0) {
+                listDiv.innerHTML = "";
+                noFavDiv.classList.remove("hidden");
+                return;
+            }
+
+            const { data: annonces, error } = await supabase
+                .from('annonces')
+                .select('*')
+                .in('id', userFavorisIds);
+
+            if (error) {
+                listDiv.innerHTML = "<p class='text-center text-red-500 col-span-2 py-8'>Erreur lors du chargement des favoris.</p>";
+                return;
+            }
+
+            noFavDiv.classList.add("hidden");
+            listDiv.innerHTML = "";
+
+            annonces.forEach(item => {
+                const imgUrl = item.image_url || "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80";
+                const card = document.createElement("div");
+                card.className = "bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 flex flex-col";
+                card.innerHTML = `
+                    <div class="h-48 w-full bg-cover bg-center" style="background-image: url('${imgUrl}')"></div>
+                    <div class="p-4 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">${item.titre}</h3>
+                                <span class="text-orange-600 font-extrabold text-lg">${item.prix} €</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">${item.description || "Aucune description."}</p>
+                        </div>
+                        <div class="border-t pt-3 flex justify-between items-center mt-auto">
+                            <button onclick="toggleFavori('${item.id}')" class="text-yellow-500 font-bold flex items-center gap-1">⭐ Retirer</button>
+                            ${item.prenom !== currentUser ? 
+                                `<button onclick="ouvrirChat('${item.id}', '${item.titre}', '${item.prenom}')" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">Contacter</button>` : 
+                                `<span class="text-xs text-gray-400">Ton annonce</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+                listDiv.appendChild(card);
+            });
+        }
+
+        // --- FONCTIONS CLASSIQUES (ANNONCES) ---
+        async function loadAnnonces() {
+            await fetchFavorisIds();
+            const listDiv = document.getElementById("annonces-list");
+            listDiv.innerHTML = "<p class='text-center text-gray-500 col-span-2 py-8'>Chargement des annonces en ligne...</p>";
+
+            const { data: annonces, error } = await supabase
+                .from('annonces')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                listDiv.innerHTML = "<p class='text-center text-red-500 col-span-2 py-8'>Erreur réseau lors de la récupération.</p>";
+                return;
+            }
+
+            if (annonces.length === 0) {
+                listDiv.innerHTML = "";
+                document.getElementById("no-annonces").classList.remove("hidden");
+                return;
+            }
+
+            document.getElementById("no-annonces").classList.add("hidden");
+            listDiv.innerHTML = "";
+
+            annonces.forEach(item => {
+                const imgUrl = item.image_url || "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80";
+                const isFav = userFavorisIds.includes(item.id);
+                const card = document.createElement("div");
+                card.className = "bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 flex flex-col";
+                card.innerHTML = `
+                    <div class="h-48 w-full bg-cover bg-center relative" style="background-image: url('${imgUrl}')">
+                        <!-- Petit bouton Favori en haut à droite de l'image -->
+                        <button onclick="toggleFavori('${item.id}')" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-xl p-1.5 rounded-full shadow-md transition duration-150">
+                            ${isFav ? '⭐' : '☆'}
+                        </button>
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">${item.titre}</h3>
+                                <span class="text-orange-600 font-extrabold text-lg">${item.prix} €</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">${item.description || "Aucune description."}</p>
+                        </div>
+                        <div class="border-t pt-3 flex justify-between items-center mt-auto">
+                            <span class="text-xs text-gray-400">Par : <strong>${item.prenom}</strong></span>
+                            ${item.prenom !== currentUser ? 
+                                `<button onclick="ouvrirChat('${item.id}', '${item.titre}', '${item.prenom}')" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">Contacter</button>` : 
+                                `<button onclick="supprimerAnnonce('${item.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3 py-2 rounded-lg transition">Supprimer</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+                listDiv.appendChild(card);
+            });
+        }
+
+        async function publierAnnonce() {
+            const titre = document.getElementById("add-titre").value.trim();
+            const prix = parseFloat(document.getElementById("add-prix").value);
+            const img = document.getElementById("add-img").value.trim();
+            const desc = document.getElementById("add-desc").value.trim();
+
+            if (!titre || isNaN(prix)) {
+                alert("Il faut au moins indiquer un titre et un prix !");
+                return;
+            }
+
+            const { error } = await supabase.from('annonces').insert([
+                { titre, prix, description: desc, prenom: currentUser, image_url: img }
+            ]);
+
+            if (error) {
+                alert("Oups ! Impossible de publier : " + error.message);
+                return;
+            }
+
+            // Réinitialiser les champs de saisie
+            document.getElementById("add-titre").value = "";
+            document.getElementById("add-prix").value = "";
+            document.getElementById("add-img").value = "";
+            document.getElementById("add-desc").value = "";
+            
+            showSection('feed');
+        }
+
+        async function supprimerAnnonce(id) {
+            if (confirm("Supprimer définitivement cette annonce ?")) {
+                const { error } = await supabase.from('annonces').delete().eq('id', id);
+                if (error) {
+                    alert("Erreur de suppression : " + error.message);
+                } else {
+                    loadAnnonces();
+                }
+            }
+        }
+
+        // --- FONCTIONS MESSAGERIE (CHAT ET BOÎTE DE RÉCEPTION) ---
+        async function ouvrirChat(annonceId, annonceTitre, vendeur) {
+            currentAnnonceId = annonceId;
+            document.getElementById("chat-title").innerText = `Discuter avec ${vendeur}`;
+            document.getElementById("chat-item").innerText = `Annonce : ${annonceTitre}`;
+            showSection('chat');
+            
+            await loadMessages();
+
+            // Mettre en place la surveillance temps réel pour les nouveaux messages reçus
+            if (messagesSubscription) {
+                supabase.removeChannel(messagesSubscription);
+            }
+            
+            messagesSubscription = supabase
+                .channel('room-' + annonceId)
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'messages', filter: `annonce_id=eq.${annonceId}` },
+                    (payload) => {
+                        appendMessage(payload.new);
+                    }
+                )
+                .subscribe();
+        }
+
+        async function loadMessages() {
+            const container = document.getElementById("chat-messages");
+            container.innerHTML = "<p class='text-center text-gray-400 text-xs py-4'>Récupération des messages...</p>";
+
+            const { data: messages, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('annonce_id', currentAnnonceId)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                container.innerHTML = "<p class='text-center text-red-500 text-xs py-4'>Problème de connexion.</p>";
+                return;
+            }
+
+            container.innerHTML = "";
+            messages.forEach(msg => appendMessage(msg));
+        }
+
+        function appendMessage(msg) {
+            const container = document.getElementById("chat-messages");
+            
+            // Éviter de rajouter un message s'il existe déjà à l'écran
+            if (document.getElementById(`msg-${msg.id}`)) return;
+
+            const isMe = msg.expediteur === currentUser;
+            const bubble = document.createElement("div");
+            bubble.id = `msg-${msg.id}`;
+            bubble.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+            
+            // Chercher l'avatar local de l'expéditeur
+            const expAvatar = localStorage.getItem(`avatar_${msg.expediteur}`) || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100";
+
+            bubble.innerHTML = `
+                <div class="flex items-center gap-1.5 mb-0.5">
+                    ${!isMe ? `<img src="${expAvatar}" class="w-3.5 h-3.5 rounded-full object-cover">` : ''}
+                    <span class="text-[10px] text-gray-400 font-semibold">${msg.expediteur}</span>
+                </div>
+                <div class="max-w-[80%] rounded-2xl px-3.5 py-1.5 text-sm shadow-sm ${
+                    isMe ? 'bg-orange-500 text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-150 rounded-tl-none'
+                }">
+                    ${msg.texte}
+                </div>
+            `;
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function envoyerMessage() {
+            const input = document.getElementById("chat-input");
+            const texte = input.value.trim();
+
+            if (!texte) return;
+            input.value = "";
+
+            const { error } = await supabase.from('messages').insert([
+                { annonce_id: currentAnnonceId, expediteur: currentUser, texte: texte }
+            ]);
+
+            if (error) {
+                alert("Erreur d'envoi du message : " + error.message);
+            }
+        }
+
+        async function loadDiscussions() {
+            const listDiv = document.getElementById("inbox-list");
+            const noMsgDiv = document.getElementById("no-messages");
+            listDiv.innerHTML = "<p class='text-center text-gray-500 py-8'>Chargement de tes conversations...</p>";
+
+            // 1. Récupérer toutes les annonces de la base de données
+            const { data: allAnnonces, error: errAnn } = await supabase.from('annonces').select('*');
+            // 2. Récupérer tous les messages échangés sur la plateforme
+            const { data: allMessages, error: errMsg } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+
+            if (errAnn || errMsg) {
+                listDiv.innerHTML = "<p class='text-center text-red-500 py-8'>Erreur réseau lors de l'accès aux messages.</p>";
+                return;
+            }
+
+            listDiv.innerHTML = "";
+
+            // On filtre pour trouver les annonces qui nous concernent (soit on est le vendeur, soit on est l'acheteur actif)
+            const activeConvs = allAnnonces.filter(annonce => {
+                const amIVendeur = annonce.prenom === currentUser;
+                const didISendMsg = allMessages.some(m => m.annonce_id === annonce.id && m.expediteur === currentUser);
+                const hasMessages = allMessages.some(m => m.annonce_id === annonce.id);
+                return (amIVendeur || didISendMsg) && hasMessages;
+            });
+
+            if (activeConvs.length === 0) {
+                noMsgDiv.classList.remove("hidden");
+                return;
+            }
+
+            noMsgDiv.classList.add("hidden");
+
+            activeConvs.forEach(annonce => {
+                const messagesDeCetteAnnonce = allMessages.filter(m => m.annonce_id === annonce.id);
+                const dernierMessage = messagesDeCetteAnnonce[0]; // Le plus récent
+
+                const card = document.createElement("div");
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-orange-300 transition duration-150 cursor-pointer flex justify-between items-center";
+                card.onclick = () => ouvrirChat(annonce.id, annonce.titre, annonce.prenom);
+                
+                card.innerHTML = `
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <span class="font-bold text-gray-800">${annonce.titre}</span>
+                            <span class="text-xs text-gray-400 font-semibold">Par : ${annonce.prenom}</span>
+                        </div>
+                        <p class="text-sm text-gray-500 truncate max-w-[250px]">
+                            <strong class="text-gray-700">${dernierMessage.expediteur} :</strong> ${dernierMessage.texte}
+                        </p>
+                    </div>
+                    <div class="text-orange-500 font-black ml-4 text-lg">➔</div>
+                `;
+                listDiv.appendChild(card);
+            });
+        }
+    </script>
 </body>
 </html>
 
