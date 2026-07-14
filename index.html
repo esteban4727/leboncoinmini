@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>leboncoin mini</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #ffffff; padding-bottom: 80px;">
+
+  <!-- ==================== 1. ÉCRAN DE BIENVENUE ==================== -->
+  <div id="ecran-bienvenue" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <h1 style="color: orange; font-size: 32px; margin-bottom: 5px;">leboncoin</h1>
+    <h2 style="color: orange; margin-top: 0; font-size: 18px; margin-bottom: 30px;">mini</h2>
+    <input type="text" id="saisie-prenom" placeholder="Quel est ton prénom ?" style="background-color: #f4f6f8; border: none; border-radius: 20px; padding: 15px; width: 80%; max-width: 300px; text-align: center; font-size: 16px; margin-bottom: 20px; outline: none;">
+    <button onclick="validerPrenom()" style="background-color: orange; color: white; border: none; border-radius: 20px; padding: 12px 30px; font-weight: bold; font-size: 16px; cursor: pointer;">Continuer</button>
+  </div>
+
+  <!-- ==================== 2. FORMULAIRE DE CRÉATION D'ANNONCE ==================== -->
+  <div id="formulaire-annonce" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 999; box-sizing: border-box; padding: 20px; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="color: #1a2028; margin: 0;">Déposer une annonce</h2>
+      <button onclick="fermerFormulaire()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">✕</button>
+    </div>
+    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Titre de l'annonce</label>
+    <input type="text" id="titre-annonce" placeholder="Ex: Vélo rouge VTT" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Prix (€)</label>
+    <input type="number" id="prix-annonce" placeholder="Ex: 45" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Ajouter une photo</label>
+    <input type="file" id="photo-annonce" accept="image/*" style="width: 100%; padding: 10px 0; margin-bottom: 15px; box-sizing: border-box;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #1a2028;">Description</label>
+    <textarea id="desc-annonce" placeholder="Décris ton objet..." rows="4" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; font-family: sans-serif;"></textarea>
+    <button onclick="creerAnnonce()" style="width: 100%; background-color: orange; color: white; border: none; border-radius: 8px; padding: 15px; font-weight: bold; font-size: 16px; cursor: pointer;">Publier mon annonce</button>
+  </div>
+
+  <!-- ==================== 3. PAGE DÉTAIL D'UNE ANNONCE ==================== -->
+  <div id="page-detail" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 998; box-sizing: border-box; padding: 20px; overflow-y: auto;">
+    <button onclick="fermerDetail()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #1a2028; margin-bottom: 15px; font-weight: bold;">← Retour</button>
+    <div id="detail-contenu"></div>
+  </div>
+
+  <!-- ==================== 4. ONGLETS DE NAVIGATION ==================== -->
+  
+  <div id="page-favoris" style="display: none; padding: 20px 15px; margin-bottom: 60px;">
+    <h2 style="color: #1a2028; margin-top: 0;">Mes Favoris ❤️</h2>
+    <div id="liste-favoris" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+      <p style="grid-column: span 2; color: #888; text-align: center; margin-top: 40px;">Tu n'as pas encore de favoris.</p>
+    </div>
+  </div>
+
+  <div id="page-messages" style="display: none; padding: 20px 15px; margin-bottom: 60px; height: calc(100vh - 120px); display: flex; flex-direction: column; box-sizing: border-box;">
+    <h2 style="color: #1a2028; margin-top: 0; margin-bottom: 10px;">Messages en direct 💬</h2>
+    <div id="zone-discussions" style="flex: 1; overflow-y: auto; background-color: #f4f6f8; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;">
+      <p id="msg-aucune-disc" style="color: #888; text-align: center; margin-top: 40px;">Choisis une annonce et clique sur "Discuter en réel avec le vendeur" pour lui envoyer un message.</p>
+    </div>
+    <div id="bloc-envoi-message" style="display: none; gap: 8px;">
+      <input type="text" id="texte-message" placeholder="Ton message..." style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none;">
+      <button onclick="envoyerMessageReel()" style="background-color: orange; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-weight: bold; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">➔</button>
+    </div>
+  </div>
+
+  <div id="page-resultats-recherche" style="display: none; padding: 20px 15px; margin-bottom: 60px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <button onclick="fermerRecherche()" style="background: none; border: none; font-size: 16px; cursor: pointer; color: orange; font-weight: bold;">← Accueil</button>
+      <h3 style="margin: 0; color: #1a2028;">Résultats de recherche</h3>
+    </div>
+    <div id="liste-resultats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
+  </div>
+
+  <div id="page-accueil">
+    <h1 style="text-align: center; color: orange; margin-bottom: 0;">leboncoin</h1>
+    <h2 style="text-align: center; color: orange; margin-top: 0; font-size: 14px; letter-spacing: 2px;">mini</h2>
+
+    <input type="text" id="barre-recherche" onkeypress="verifierEntreeRecherche(event)" placeholder="🔍 Rechercher (Appuie sur Entrée)..." style="background-color: #f4f6f8; border: none; border-radius: 20px; padding: 15px; width: 90%; display: block; margin: 20px auto; font-size: 16px; box-sizing: border-box; outline: none;">
+
+    <div style="padding: 0 15px;">
+      <h3 style="color: #1a2028; margin-bottom: 15px;">Annonces récentes</h3>
+      <div id="liste-annonces" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
+    </div>
+  </div>
+
+  <!-- BARRE DE NAVIGATION -->
+  <div style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background-color: white; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); z-index: 990;">
+    <div onclick="changerOnglet('accueil')" style="text-align: center; color: #1a2028; cursor: pointer;">
+      <div style="font-size: 18px;">🔍</div>
+      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">Rechercher</div>
+    </div>
+    <div onclick="changerOnglet('favoris')" style="text-align: center; color: #1a2028; cursor: pointer;">
+      <div style="font-size: 18px;">❤️</div>
+      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">Favoris</div>
+    </div>
+    <div onclick="ouvrirFormulaire()" style="text-align: center; color: #1a2028; cursor: pointer;">
+      <div style="width: 22px; height: 22px; border: 2px solid #1a2028; border-radius: 6px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;">+</div>
+      <div style="font-size: 10px; font-weight: bold; margin-top: 3px;">Publier</div>
+    </div>
+    <div onclick="changerOnglet('messages')" style="text-align: center; color: #1a2028; cursor: pointer;">
+      <div style="font-size: 18px;">💬</div>
+      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">Messages</div>
+    </div>
+    <div style="text-align: center; color: #1a2028; cursor: pointer;">
+      <div id="lettre-profil" style="width: 20px; height: 20px; background-color: #00838f; color: white; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">?</div>
+      <div style="font-size: 10px; font-weight: bold; margin-top: 3px;">Compte</div>
+    </div>
+  </div>
+
+  <script>
+    const TOPIC_NAME = "leboncoin_mini_chat_9973"; 
+    var prenomUtilisateur = "Anonyme";
+    var baseAnnonces = [];
+    var favorisIds = [];
+    var destinataireActuel = "";
+    var sourceEvenements = null;
+
+    function validerPrenom() {
+      var prenom = document.getElementById("saisie-prenom").value.trim();
+      if (prenom === "") { alert("Entre ton prénom !"); return; }
+      prenomUtilisateur = prenom;
+      document.getElementById("lettre-profil").innerText = prenom.charAt(0).toUpperCase();
+      document.getElementById("ecran-bienvenue").style.display = "none";
+      changerOnglet('accueil');
+      connecterMessagerieLive();
+    }
+
+    function connecterMessagerieLive() {
+      sourceEvenements = new EventSource(`https://ntfy.sh/${TOPIC_NAME}/sse`);
+      sourceEvenements.onmessage = function(event) {
+        try {
+          var donneesBrutes = JSON.parse(event.data);
+          var messageObj = JSON.parse(donneesBrutes.message);
+          recevoirMessage(messageObj);
+        } catch(e) {}
+      };
+    }
+
+    function envoyerMessageReel() {
+      var input = document.getElementById("texte-message");
+      if (input.value.trim() === "") return;
+      fetch(`https://ntfy.sh/${TOPIC_NAME}`, {
+        method: 'POST',
+        body: JSON.stringify({ expediteur: prenomUtilisateur, destinataire: destinataireActuel, texte: input.value.trim() })
+      });
+      input.value = "";
+    }
+
+    function recevoirMessage(payload) {
+      if ((payload.expediteur === prenomUtilisateur && payload.destinataire === destinataireActuel) ||
+          (payload.expediteur === destinataireActuel && payload.destinataire === prenomUtilisateur)) {
+        var zone = document.getElementById("zone-discussions");
+        var msgDefaut = document.getElementById("msg-aucune-disc");
+        if (msgDefaut) msgDefaut.style.display = "none";
+        var bulleHTML = (payload.expediteur === prenomUtilisateur) ? 
+          `<div style="align-self: flex-end; background-color: #00838f; color: white; padding: 10px 14px; border-radius: 15px 15px 0 15px; max-width: 75%; font-size: 14px;">${payload.texte}</div>` : 
+          `<div style="align-self: flex-start; background-color: white; color: #1a2028; padding: 10px 14px; border-radius: 15px 15px 15px 0; max-width: 75%; font-size: 14px; border: 1px solid #e0e0e0;"><strong style="font-size: 10px; color: #00838f; display: block;">${payload.expediteur}</strong>${payload.texte}</div>`;
+        zone.insertAdjacentHTML('beforeend', bulleHTML);
+        zone.scrollTop = zone.scrollHeight;
+      }
+    }
+
+    function ouvrirMessagerieReelle(nomDestinataire) {
+      if (nomDestinataire === prenomUtilisateur) { alert("Tu ne peux pas te parler à toi-même !"); return; }
+      destinataireActuel = nomDestinataire;
+      fermerDetail();
+      changerOnglet('messages');
+      var zone = document.getElementById("zone-discussions");
+      zone.innerHTML = `<p style="color: #888; text-align: center; font-size: 12px;">Discussion avec <strong>${nomDestinataire}</strong></p>`;
+      document.getElementById("bloc-envoi-message").style.display = "flex";
+    }
+
+    function ouvrirFormulaire() { document.getElementById("formulaire-annonce").style.display = "block"; }
+    function fermerFormulaire() { document.getElementById("formulaire-annonce").style.display = "none"; }
+
+    function creerAnnonce() {
+      var titre = document.getElementById("titre-annonce").value;
+      var prix = document.getElementById("prix-annonce").value;
+      var desc = document.getElementById("desc-annonce").value;
+      if (titre === "" || prix === "" || desc === "") { alert("Remplis tout !"); return; }
+      var nouvelleAnnonce = { id: "ann_" + Date.now(), titre, prix, desc, auteur: prenomUtilisateur, photo: "" };
+      var photoInput = document.getElementById("photo-annonce");
+      if (photoInput.files && photoInput.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) { nouvelleAnnonce.photo = e.target.result; enregistrerEtAfficher(nouvelleAnnonce); }
+        reader.readAsDataURL(photoInput.files[0]);
+      } else { enregistrerEtAfficher(nouvelleAnnonce); }
+    }
+
+    function enregistrerEtAfficher(annonce) {
+      baseAnnonces.unshift(annonce);
+      genererGrilleAnnonces("liste-annonces", baseAnnonces);
+      document.getElementById("titre-annonce").value = "";
+      document.getElementById("prix-annonce").value = "";
+      document.getElementById("desc-annonce").value = "";
+      fermerFormulaire();
+    }
+
+    function genererGrilleAnnonces(elementId, listeDonnees) {
+      var conteneur = document.getElementById(elementId);
+      conteneur.innerHTML = (listeDonnees.length === 0) ? '<p style="grid-column: span 2; color: #888; text-align: center; margin-top: 40px;">Aucune annonce pour le moment.</p>' : "";
+      listeDonnees.forEach(function(a) {
+        var imgHTML = a.photo ? `<img src="${a.photo}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px;">` : `<div style="width: 100%; height: 110px; background-color: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center;">📦</div>`;
+        conteneur.insertAdjacentHTML('beforeend', `<div onclick="ouvrirDetail('${a.id}')" style="background-color: #f4f6f8; padding: 10px; border-radius: 12px; cursor: pointer;">${imgHTML}<h4 style="margin: 8px 0;">${a.titre}</h4><p style="color: orange; font-weight:bold;">${a.prix} €</p></div>`);
+      });
+    }
+
+    function ouvrirDetail(id) {
+      var a = baseAnnonces.find(a => a.id === id);
+      document.getElementById("detail-contenu").innerHTML = `<h1>${a.titre}</h1><h2 style="color:orange;">${a.prix} €</h2><p>${a.desc}</p><button onclick="ouvrirMessagerieReelle('${a.auteur}')" style="width:100%; background:orange; color:white; border:none; padding:15px; border-radius:8px;">Contacter le vendeur</button>`;
+      document.getElementById("page-detail").style.display = "block";
+    }
+
+    function fermerDetail() { document.getElementById("page-detail").style.display = "none"; }
+    function changerOnglet(onglet) {
+      document.getElementById("page-accueil").style.display = (onglet === 'accueil') ? "block" : "none";
+      document.getElementById("page-favoris").style.display = (onglet === 'favoris') ? "block" : "none";
+      document.getElementById("page-messages").style.display = (onglet === 'messages') ? "flex" : "none";
+    }
+    function verifierEntreeRecherche(e) { if(e.key === "Enter") { /* logique simplifiée */ } }
+    function fermerRecherche() { document.getElementById("page-resultats-recherche").style.display = "none"; document.getElementById("page-accueil").style.display = "block"; }
+  </script>
+</body>
+</html>
+
