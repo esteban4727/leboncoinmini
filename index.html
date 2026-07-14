@@ -3,184 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leboncoin Mini - Version Complète</title>
+    <title>Leboncoin Mini - Version Finale</title>
     <!-- Tailwind CSS pour un joli design -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Import de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col font-sans pb-20"> <!-- pb-20 pour ne pas que la barre du bas cache le contenu -->
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans pb-24"> <!-- pb-24 pour éviter que la barre du bas ne cache le contenu -->
 
-    <!-- Écran de Connexion (Prénom) -->
+    <!-- ========================================= -->
+    <!-- ÉCRAN DE CONNEXION (PRÉNOM) -->
+    <!-- ========================================= -->
     <div id="auth-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-            <h1 class="text-3xl font-extrabold text-orange-500 mb-2">leboncoin <span class="text-gray-700">mini</span></h1>
+            <h1 class="text-4xl font-black text-orange-500 mb-2">leboncoin <span class="text-gray-700 font-normal text-2xl">mini</span></h1>
             <p class="text-gray-500 mb-6">Entre ton prénom pour commencer à jouer !</p>
             <input type="text" id="username-input" placeholder="Ton prénom" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4 text-center text-lg">
             <button onclick="saveUsername()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition duration-200 text-lg shadow-md">Rejoindre le jeu</button>
         </div>
     </div>
 
-    <!-- Écran Principal de l'Application -->
+    <!-- ========================================= -->
+    <!-- ÉCRAN PRINCIPAL DE L'APP -->
+    <!-- ========================================= -->
     <div id="app-screen" class="hidden flex-col flex-grow">
+        
         <!-- Header du haut -->
-        <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
             <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
                 <h1 class="text-2xl font-black text-orange-500 cursor-pointer" onclick="showSection('feed')">leboncoin</h1>
-                <div class="flex items-center gap-4">
-                    <!-- Petite photo de profil dynamique dans le header -->
-                    <img id="header-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="w-8 h-8 rounded-full object-cover border border-orange-500" onclick="showSection('profile')">
+                <div class="flex items-center gap-3">
+                    <!-- Photo de profil cliquable -->
+                    <img id="header-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="w-9 h-9 rounded-full object-cover border-2 border-orange-500 cursor-pointer" onclick="showSection('profile')">
                     <span id="user-display" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-bold text-sm"></span>
-                    <button onclick="logout()" class="text-xs text-gray-500 hover:text-red-500">Quitter</button>
+                    <button onclick="logout()" class="text-xs text-gray-400 hover:text-red-500 font-semibold transition">Quitter</button>
                 </div>
             </div>
         </header>
 
-        <!-- Contenu de l'application -->
+        <!-- Contenu central dynamique -->
         <main class="flex-grow max-w-4xl w-full mx-auto p-4">
             
             <!-- SECTION 1 : ACCUEIL / FIL D'ANNONCES -->
             <div id="section-feed" class="space-y-4">
                 <div id="annonces-list" class="grid gap-4 md:grid-cols-2">
-                    <!-- Les annonces s'afficheront ici dynamiquement -->
+                    <!-- Les annonces s'injectent ici -->
                 </div>
-                <div id="no-annonces" class="text-center py-12 text-gray-500 hidden">
+                <div id="no-annonces" class="text-center py-16 text-gray-500 hidden">
+                    <span class="text-4xl block mb-2">📭</span>
                     Aucune annonce en ligne pour l'instant. Sois le premier à en ajouter une !
                 </div>
             </div>
 
             <!-- SECTION 2 : CRÉER UNE ANNONCE -->
             <div id="section-create" class="hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow-md">
-                <h2 class="text-xl font-bold mb-4 text-gray-800">Déposer une annonce</h2>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2"><span>➕</span> Déposer une annonce</h2>
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Titre de l'objet</label>
-                        <input type="text" id="add-titre" placeholder="Ex: Vélo rouge vintage" class="w-full px-3 py-2 border rounded-lg focus:outline-none">
+                        <input type="text" id="add-titre" placeholder="Ex: Magnifique vélo de course" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Prix (€)</label>
-                        <input type="number" id="add-prix" placeholder="Ex: 45" class="w-full px-3 py-2 border rounded-lg focus:outline-none">
+                        <input type="number" id="add-prix" placeholder="Ex: 120" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Lien d'une image (Optionnel)</label>
-                        <input type="text" id="add-img" placeholder="https://exemple.com/image.jpg" class="w-full px-3 py-2 border rounded-lg focus:outline-none">
+                        <input type="text" id="add-img" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
-                        <textarea id="add-desc" rows="3" placeholder="Décris ton objet..." class="w-full px-3 py-2 border rounded-lg focus:outline-none"></textarea>
+                        <textarea id="add-desc" rows="3" placeholder="Description de l'état, caractéristiques..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
                     </div>
-                    <button onclick="publierAnnonce()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-md transition">Publier mon annonce</button>
+                    <button onclick="publierAnnonce()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-md transition duration-150">Publier mon annonce</button>
                 </div>
             </div>
 
             <!-- SECTION 3 : FAVORIS -->
             <div id="section-fav" class="hidden space-y-4">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Mes favoris ⭐</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><span>⭐</span> Mes favoris</h2>
                 <div id="fav-list" class="grid gap-4 md:grid-cols-2">
-                    <!-- Les favoris s'afficheront ici -->
+                    <!-- Les favoris s'injectent ici -->
                 </div>
-                <div id="no-fav" class="text-center py-12 text-gray-500 hidden">
-                    Tu n'as pas encore d'annonces en favoris.
+                <div id="no-fav" class="text-center py-16 text-gray-500 hidden">
+                    <span class="text-4xl block mb-2">⭐</span>
+                    Tu n'as pas encore ajouté d'annonces en favori.
                 </div>
             </div>
 
-            <!-- SECTION 4 : DISCUSSION CHAT (INDIVIDUELLE) -->
-            <div id="section-chat" class="hidden flex flex-col bg-white rounded-xl shadow-md overflow-hidden max-w-lg mx-auto h-[450px]">
-                <div class="bg-orange-500 text-white p-4 flex justify-between items-center">
+            <!-- SECTION 4 : CHAT DE DISCUSSION -->
+            <div id="section-chat" class="hidden flex flex-col bg-white rounded-xl shadow-md overflow-hidden max-w-lg mx-auto h-[500px]">
+                <div class="bg-orange-500 text-white p-4 flex justify-between items-center shadow-sm">
                     <div>
-                        <h3 id="chat-title" class="font-bold">Discuter</h3>
-                        <p id="chat-item" class="text-xs text-orange-100"></p>
+                        <h3 id="chat-title" class="font-bold text-lg">Discuter</h3>
+                        <p id="chat-item" class="text-xs text-orange-100 truncate max-w-[250px]"></p>
                     </div>
-                    <button onclick="showSection('feed')" class="text-white hover:text-gray-200 font-bold text-sm">Retour</button>
+                    <button onclick="showSection('feed')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Retour</button>
                 </div>
-                <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm">
-                    <!-- Messages -->
+                <!-- Zone de messages -->
+                <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm flex flex-col">
+                    <!-- Les bulles s'injectent ici -->
                 </div>
+                <!-- Zone de saisie -->
                 <div class="p-3 border-t bg-white flex gap-2">
-                    <input type="text" id="chat-input" placeholder="Écris ton message..." class="flex-grow px-3 py-2 border rounded-lg focus:outline-none">
-                    <button onclick="envoyerMessage()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold">Envoyer</button>
+                    <input type="text" id="chat-input" placeholder="Écris ton message..." class="flex-grow px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" autocomplete="off">
+                    <button onclick="envoyerMessage()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg font-bold transition">Envoyer</button>
                 </div>
             </div>
 
-            <!-- SECTION 5 : BOÎTE DE RÉCEPTION (LISTE DES MESSAGES) -->
+            <!-- SECTION 5 : BOÎTE DE RÉCEPTION -->
             <div id="section-inbox" class="hidden space-y-4 max-w-lg mx-auto">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Mes Discussions 💬</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><span>💬</span> Mes Discussions</h2>
                 <div id="inbox-list" class="space-y-3">
-                    <!-- Liste des discussions -->
+                    <!-- Les conversations groupées s'injectent ici -->
                 </div>
-                <div id="no-messages" class="text-center py-12 text-gray-500 hidden">
-                    Tu n'as pas encore de discussion en cours.
+                <div id="no-messages" class="text-center py-16 text-gray-500 hidden">
+                    <span class="text-4xl block mb-2">💬</span>
+                    Tu n'as pas encore engagé de conversation.
                 </div>
             </div>
 
-            <!-- SECTION 6 : MON COMPTE / PROFIL -->
+            <!-- SECTION 6 : MON PROFIL / MON COMPTE -->
             <div id="section-profile" class="hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow-md text-center">
-                <h2 class="text-xl font-bold mb-6 text-gray-800">Mon Profil 👤</h2>
+                <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center justify-center gap-2"><span>👤</span> Mon Profil</h2>
                 <div class="flex flex-col items-center mb-6">
                     <img id="profile-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="w-24 h-24 rounded-full object-cover border-4 border-orange-500 shadow-md mb-4" alt="Photo de profil">
-                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800">Prénom</h3>
+                    <h3 id="profile-name" class="text-2xl font-black text-gray-800">Prénom</h3>
                 </div>
                 <div class="space-y-4 text-left">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Lien de ta photo de profil (URL)</label>
-                        <input type="text" id="avatar-input" placeholder="https://exemple.com/ma-photo.jpg" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Lien internet de ta photo de profil (URL)</label>
+                        <input type="text" id="avatar-input" placeholder="https://images.unsplash.com/photo-..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
-                    <button onclick="saveProfile()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg shadow transition">Enregistrer ma photo</button>
+                    <button onclick="saveProfile()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg shadow transition">Enregistrer ma photo</button>
                 </div>
             </div>
 
         </main>
 
-        <!-- BARRE DE NAVIGATION FIXE EN BAS (Style Leboncoin) -->
+        <!-- BARRE DE NAVIGATION FIXE (Style Leboncoin) -->
         <nav class="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-50 shadow-lg">
             <div class="max-w-4xl mx-auto flex justify-around text-center py-2">
-                <!-- Accueil -->
-                <button id="nav-feed" onclick="showSection('feed')" class="flex flex-col items-center flex-1 text-orange-500">
+                <button id="nav-feed" onclick="showSection('feed')" class="flex flex-col items-center flex-1 text-orange-500 transition">
                     <span class="text-xl">🏠</span>
-                    <span class="text-[10px] font-bold">Accueil</span>
+                    <span class="text-[10px] font-bold mt-0.5">Accueil</span>
                 </button>
-                <!-- Favoris -->
-                <button id="nav-fav" onclick="showSection('fav')" class="flex flex-col items-center flex-1 text-gray-500">
+                <button id="nav-fav" onclick="showSection('fav')" class="flex flex-col items-center flex-1 text-gray-500 transition">
                     <span class="text-xl">⭐</span>
-                    <span class="text-[10px] font-bold">Favoris</span>
+                    <span class="text-[10px] font-bold mt-0.5">Favoris</span>
                 </button>
-                <!-- Publier -->
-                <button id="nav-create" onclick="showSection('create')" class="flex flex-col items-center flex-1 text-gray-500">
+                <button id="nav-create" onclick="showSection('create')" class="flex flex-col items-center flex-1 text-gray-500 transition">
                     <span class="text-xl">➕</span>
-                    <span class="text-[10px] font-bold">Publier</span>
+                    <span class="text-[10px] font-bold mt-0.5">Publier</span>
                 </button>
-                <!-- Messages -->
-                <button id="nav-inbox" onclick="showSection('inbox')" class="flex flex-col items-center flex-1 text-gray-500">
+                <button id="nav-inbox" onclick="showSection('inbox')" class="flex flex-col items-center flex-1 text-gray-500 transition">
                     <span class="text-xl">💬</span>
-                    <span class="text-[10px] font-bold">Messages</span>
+                    <span class="text-[10px] font-bold mt-0.5">Messages</span>
                 </button>
-                <!-- Mon Compte -->
-                <button id="nav-profile" onclick="showSection('profile')" class="flex flex-col items-center flex-1 text-gray-500">
+                <button id="nav-profile" onclick="showSection('profile')" class="flex flex-col items-center flex-1 text-gray-500 transition">
                     <span class="text-xl">👤</span>
-                    <span class="text-[10px] font-bold">Compte</span>
+                    <span class="text-[10px] font-bold mt-0.5">Compte</span>
                 </button>
             </div>
         </nav>
     </div>
 
-    <!-- Ici commencera la balise script de la partie 2 -->
-
-<!-- ========================================= -->
-    <!-- PARTIE 2 : LOGIQUE ET BASE DE DONNÉES -->
+    <!-- ========================================= -->
+    <!-- LOGIQUE JAVASCRIPT CORRIGÉE -->
     <!-- ========================================= -->
     <script>
-        // --- CONNEXION SUPABASE ---
         const SUPABASE_URL = "https://ilqlsizyoxnktlhrdofv.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_n5ccYB8_CsCvjoUhduKxDQ_0nnDp9g7mR3f_E_YQ-gA"; // Ta clé publique active
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_ANON_KEY = "sb_publishable_n5ccYB8_CsCvjoUhduKxDQ_0nnDp9g7mR3f_E_YQ-gA"; 
+        
+        // CORRECTION MAJEURE : Utilisation explicite de window.supabase pour éviter le plantage d'initialisation
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = localStorage.getItem("username") || "";
         let currentAnnonceId = null;
         let messagesSubscription = null;
         let userFavorisIds = [];
 
-        // Démarrage de l'application au chargement de la page
+        // Lancement au chargement de la page
         window.onload = async () => {
+            // Configuration de la touche Entrée pour se connecter
+            const loginInput = document.getElementById("username-input");
+            if (loginInput) {
+                loginInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        saveUsername();
+                    }
+                });
+            }
+
+            // Configuration de la touche Entrée pour envoyer un message
+            const chatInput = document.getElementById("chat-input");
+            if (chatInput) {
+                chatInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        envoyerMessage();
+                    }
+                });
+            }
+
             if (currentUser) {
                 await showApp();
             } else {
@@ -198,10 +224,7 @@
             document.getElementById("app-screen").classList.remove("hidden");
             document.getElementById("user-display").innerText = currentUser;
             
-            // Charger la photo de profil dans le header
             loadProfileData();
-            
-            // Récupérer les favoris en tâche de fond et afficher l'accueil
             await fetchFavorisIds();
             showSection('feed');
         }
@@ -221,9 +244,9 @@
             showAuth();
         }
 
-        // --- GESTION DE LA NAVIGATION (Changement de sections) ---
+        // --- GESTION DE LA NAVIGATION ---
         function showSection(section) {
-            // Masquer absolument toutes les fenêtres de contenu
+            // Masquer toutes les sections
             document.getElementById("section-feed").classList.add("hidden");
             document.getElementById("section-create").classList.add("hidden");
             document.getElementById("section-chat").classList.add("hidden");
@@ -231,7 +254,7 @@
             document.getElementById("section-inbox").classList.add("hidden");
             document.getElementById("section-profile").classList.add("hidden");
 
-            // Réinitialiser la couleur de tous les boutons de la barre du bas
+            // Réinitialiser les boutons de navigation
             const tabs = ['feed', 'fav', 'create', 'inbox', 'profile'];
             tabs.forEach(tab => {
                 const btn = document.getElementById(`nav-${tab}`);
@@ -241,7 +264,7 @@
                 }
             });
 
-            // Afficher la section demandée
+            // Activer la section cible
             document.getElementById(`section-${section}`).classList.remove("hidden");
 
             // Mettre en orange le bouton actif
@@ -251,7 +274,7 @@
                 activeBtn.classList.add("text-orange-500");
             }
 
-            // Lancer les rechargements de données requis pour chaque section
+            // Charger les données correspondantes
             if (section === 'feed') {
                 loadAnnonces();
             } else if (section === 'fav') {
@@ -263,12 +286,10 @@
             }
         }
 
-        // --- FONCTIONS PROFIL (COMPTE) ---
+        // --- PROFIL ET PHOTO ---
         function loadProfileData() {
             document.getElementById("profile-name").innerText = currentUser;
             const storedAvatar = localStorage.getItem(`avatar_${currentUser}`);
-            
-            // Liste d'avatars par défaut sympa si vide
             const defaultAvatar = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
             
             if (storedAvatar) {
@@ -296,14 +317,18 @@
             }
         }
 
-        // --- FONCTIONS FAVORIS (Cloud) ---
+        // --- GESTION DES FAVORIS ---
         async function fetchFavorisIds() {
-            const { data, error } = await supabase
-                .from('favoris')
-                .select('annonce_id')
-                .eq('username', currentUser);
-            if (!error && data) {
-                userFavorisIds = data.map(f => f.annonce_id);
+            try {
+                const { data, error } = await supabaseClient
+                    .from('favoris')
+                    .select('annonce_id')
+                    .eq('username', currentUser);
+                if (!error && data) {
+                    userFavorisIds = data.map(f => f.annonce_id);
+                }
+            } catch (err) {
+                console.error("Erreur lors de la récupération des ID favoris :", err);
             }
         }
 
@@ -312,31 +337,26 @@
             const index = userFavorisIds.indexOf(annonceId);
             
             if (index > -1) {
-                // Déjà en favoris -> on le supprime
-                const { error } = await supabase
+                // On retire
+                const { error } = await supabaseClient
                     .from('favoris')
                     .delete()
                     .eq('username', currentUser)
                     .eq('annonce_id', annonceId);
-                
-                if (!error) {
-                    userFavorisIds.splice(index, 1);
-                }
+                if (!error) userFavorisIds.splice(index, 1);
             } else {
-                // Pas en favoris -> on l'ajoute
-                const { error } = await supabase
+                // On ajoute
+                const { error } = await supabaseClient
                     .from('favoris')
                     .insert([{ username: currentUser, annonce_id: annonceId }]);
-                
-                if (!error) {
-                    userFavorisIds.push(annonceId);
-                }
+                if (!error) userFavorisIds.push(annonceId);
             }
             
-            // On rafraîchit l'affichage de la section active
-            if (!document.getElementById("section-feed").classList.contains("hidden")) {
+            // Rafraîchir l'affichage de la section en cours
+            const isFeedVisible = !document.getElementById("section-feed").classList.contains("hidden");
+            if (isFeedVisible) {
                 loadAnnonces();
-            } else if (!document.getElementById("section-fav").classList.contains("hidden")) {
+            } else {
                 loadFavoris();
             }
         }
@@ -345,29 +365,34 @@
             await fetchFavorisIds();
             const listDiv = document.getElementById("fav-list");
             const noFavDiv = document.getElementById("no-fav");
-            listDiv.innerHTML = "<p class='text-center text-gray-500 col-span-2 py-8'>Chargement de tes favoris...</p>";
-
+            
             if (userFavorisIds.length === 0) {
                 listDiv.innerHTML = "";
                 noFavDiv.classList.remove("hidden");
                 return;
             }
 
-            const { data: annonces, error } = await supabase
+            listDiv.innerHTML = "<p class='text-center text-gray-500 col-span-2 py-8'>Chargement de tes favoris...</p>";
+            noFavDiv.classList.add("hidden");
+
+            const { data: annonces, error } = await supabaseClient
                 .from('annonces')
                 .select('*')
                 .in('id', userFavorisIds);
 
             if (error) {
-                listDiv.innerHTML = "<p class='text-center text-red-500 col-span-2 py-8'>Erreur lors du chargement des favoris.</p>";
+                listDiv.innerHTML = "<p class='text-center text-red-500 col-span-2 py-8'>Impossible de charger tes favoris.</p>";
                 return;
             }
 
-            noFavDiv.classList.add("hidden");
             listDiv.innerHTML = "";
+            if (!annonces || annonces.length === 0) {
+                noFavDiv.classList.remove("hidden");
+                return;
+            }
 
             annonces.forEach(item => {
-                const imgUrl = item.image_url || "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80";
+                const imgUrl = item.image_url && item.image_url.trim() !== "" ? item.image_url : "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80";
                 const card = document.createElement("div");
                 card.className = "bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 flex flex-col";
                 card.innerHTML = `
@@ -375,16 +400,16 @@
                     <div class="p-4 flex-grow flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-bold text-lg text-gray-800">${item.titre}</h3>
-                                <span class="text-orange-600 font-extrabold text-lg">${item.prix} €</span>
+                                <h3 class="font-bold text-lg text-gray-800 truncate">${item.titre}</h3>
+                                <span class="text-orange-600 font-extrabold text-lg flex-shrink-0">${item.prix} €</span>
                             </div>
-                            <p class="text-sm text-gray-600 mb-4">${item.description || "Aucune description."}</p>
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-3">${item.description || "Aucune description."}</p>
                         </div>
                         <div class="border-t pt-3 flex justify-between items-center mt-auto">
-                            <button onclick="toggleFavori('${item.id}')" class="text-yellow-500 font-bold flex items-center gap-1">⭐ Retirer</button>
+                            <button onclick="toggleFavori('${item.id}')" class="text-yellow-500 font-bold flex items-center gap-1 hover:scale-105 transition">⭐ Retirer</button>
                             ${item.prenom !== currentUser ? 
                                 `<button onclick="ouvrirChat('${item.id}', '${item.titre}', '${item.prenom}')" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">Contacter</button>` : 
-                                `<span class="text-xs text-gray-400">Ton annonce</span>`
+                                `<span class="text-xs text-gray-400 font-semibold bg-gray-100 px-2.5 py-1 rounded-full">Mon annonce</span>`
                             }
                         </div>
                     </div>
@@ -393,53 +418,53 @@
             });
         }
 
-        // --- FONCTIONS CLASSIQUES (ANNONCES) ---
+        // --- FIL D'ANNONCES (ACCUEIL) ---
         async function loadAnnonces() {
             await fetchFavorisIds();
             const listDiv = document.getElementById("annonces-list");
-            listDiv.innerHTML = "<p class='text-center text-gray-500 col-span-2 py-8'>Chargement des annonces en ligne...</p>";
+            const noAnnoncesDiv = document.getElementById("no-annonces");
+            listDiv.innerHTML = "<p class='text-center text-gray-500 col-span-2 py-8'>Chargement des annonces en cours...</p>";
 
-            const { data: annonces, error } = await supabase
+            const { data: annonces, error } = await supabaseClient
                 .from('annonces')
                 .select('*')
                 .order('created_at', { ascending: false });
 
             if (error) {
-                listDiv.innerHTML = "<p class='text-center text-red-500 col-span-2 py-8'>Erreur réseau lors de la récupération.</p>";
+                listDiv.innerHTML = "<p class='text-center text-red-500 col-span-2 py-8'>Une erreur réseau est survenue.</p>";
                 return;
             }
 
-            if (annonces.length === 0) {
+            if (!annonces || annonces.length === 0) {
                 listDiv.innerHTML = "";
-                document.getElementById("no-annonces").classList.remove("hidden");
+                noAnnoncesDiv.classList.remove("hidden");
                 return;
             }
 
-            document.getElementById("no-annonces").classList.add("hidden");
+            noAnnoncesDiv.classList.add("hidden");
             listDiv.innerHTML = "";
 
             annonces.forEach(item => {
-                const imgUrl = item.image_url || "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80";
+                const imgUrl = item.image_url && item.image_url.trim() !== "" ? item.image_url : "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80";
                 const isFav = userFavorisIds.includes(item.id);
                 const card = document.createElement("div");
-                card.className = "bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 flex flex-col";
+                card.className = "bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 flex flex-col hover:shadow-lg transition duration-150";
                 card.innerHTML = `
                     <div class="h-48 w-full bg-cover bg-center relative" style="background-image: url('${imgUrl}')">
-                        <!-- Petit bouton Favori en haut à droite de l'image -->
-                        <button onclick="toggleFavori('${item.id}')" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-xl p-1.5 rounded-full shadow-md transition duration-150">
+                        <button onclick="toggleFavori('${item.id}')" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-xl p-2 rounded-full shadow-md transition duration-150">
                             ${isFav ? '⭐' : '☆'}
                         </button>
                     </div>
                     <div class="p-4 flex-grow flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-bold text-lg text-gray-800">${item.titre}</h3>
-                                <span class="text-orange-600 font-extrabold text-lg">${item.prix} €</span>
+                                <h3 class="font-bold text-lg text-gray-800 truncate">${item.titre}</h3>
+                                <span class="text-orange-600 font-extrabold text-lg flex-shrink-0">${item.prix} €</span>
                             </div>
-                            <p class="text-sm text-gray-600 mb-4">${item.description || "Aucune description."}</p>
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-3">${item.description || "Aucune description."}</p>
                         </div>
                         <div class="border-t pt-3 flex justify-between items-center mt-auto">
-                            <span class="text-xs text-gray-400">Par : <strong>${item.prenom}</strong></span>
+                            <span class="text-xs text-gray-400">Par : <strong class="text-gray-600">${item.prenom}</strong></span>
                             ${item.prenom !== currentUser ? 
                                 `<button onclick="ouvrirChat('${item.id}', '${item.titre}', '${item.prenom}')" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">Contacter</button>` : 
                                 `<button onclick="supprimerAnnonce('${item.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3 py-2 rounded-lg transition">Supprimer</button>`
@@ -458,20 +483,20 @@
             const desc = document.getElementById("add-desc").value.trim();
 
             if (!titre || isNaN(prix)) {
-                alert("Il faut au moins indiquer un titre et un prix !");
+                alert("Un titre et un prix valide sont requis !");
                 return;
             }
 
-            const { error } = await supabase.from('annonces').insert([
+            const { error } = await supabaseClient.from('annonces').insert([
                 { titre, prix, description: desc, prenom: currentUser, image_url: img }
             ]);
 
             if (error) {
-                alert("Oups ! Impossible de publier : " + error.message);
+                alert("Une erreur est survenue lors de la publication : " + error.message);
                 return;
             }
 
-            // Réinitialiser les champs de saisie
+            // Réinitialisation des champs de saisie
             document.getElementById("add-titre").value = "";
             document.getElementById("add-prix").value = "";
             document.getElementById("add-img").value = "";
@@ -481,17 +506,17 @@
         }
 
         async function supprimerAnnonce(id) {
-            if (confirm("Supprimer définitivement cette annonce ?")) {
-                const { error } = await supabase.from('annonces').delete().eq('id', id);
+            if (confirm("Es-tu sûr de vouloir retirer ton annonce définitivement ?")) {
+                const { error } = await supabaseClient.from('annonces').delete().eq('id', id);
                 if (error) {
-                    alert("Erreur de suppression : " + error.message);
+                    alert("Impossible de supprimer : " + error.message);
                 } else {
                     loadAnnonces();
                 }
             }
         }
 
-        // --- FONCTIONS MESSAGERIE (CHAT ET BOÎTE DE RÉCEPTION) ---
+        // --- MESSAGERIE EN TEMPS RÉEL (CHAT) ---
         async function ouvrirChat(annonceId, annonceTitre, vendeur) {
             currentAnnonceId = annonceId;
             document.getElementById("chat-title").innerText = `Discuter avec ${vendeur}`;
@@ -500,20 +525,17 @@
             
             await loadMessages();
 
-            // Mettre en place la surveillance temps réel pour les nouveaux messages reçus
+            // Gestion du canal de communication temps réel Supabase
             if (messagesSubscription) {
-                supabase.removeChannel(messagesSubscription);
+                supabaseClient.removeChannel(messagesSubscription);
             }
             
-            messagesSubscription = supabase
+            messagesSubscription = supabaseClient
                 .channel('room-' + annonceId)
-                .on(
-                    'postgres_changes',
-                    { event: 'INSERT', schema: 'public', table: 'messages', filter: `annonce_id=eq.${annonceId}` },
-                    (payload) => {
-                        appendMessage(payload.new);
-                    }
-                )
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `annonce_id=eq.${annonceId}` }, 
+                (payload) => {
+                    appendMessage(payload.new);
+                })
                 .subscribe();
         }
 
@@ -521,14 +543,14 @@
             const container = document.getElementById("chat-messages");
             container.innerHTML = "<p class='text-center text-gray-400 text-xs py-4'>Récupération des messages...</p>";
 
-            const { data: messages, error } = await supabase
+            const { data: messages, error } = await supabaseClient
                 .from('messages')
                 .select('*')
                 .eq('annonce_id', currentAnnonceId)
                 .order('created_at', { ascending: true });
 
             if (error) {
-                container.innerHTML = "<p class='text-center text-red-500 text-xs py-4'>Problème de connexion.</p>";
+                container.innerHTML = "<p class='text-center text-red-500 text-xs py-4'>Impossible d'accéder au fil de discussion.</p>";
                 return;
             }
 
@@ -538,25 +560,22 @@
 
         function appendMessage(msg) {
             const container = document.getElementById("chat-messages");
-            
-            // Éviter de rajouter un message s'il existe déjà à l'écran
+            // Éviter de rajouter deux fois le même message si le temps réel se croise avec un envoi local
             if (document.getElementById(`msg-${msg.id}`)) return;
 
             const isMe = msg.expediteur === currentUser;
             const bubble = document.createElement("div");
             bubble.id = `msg-${msg.id}`;
-            bubble.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
-            
-            // Chercher l'avatar local de l'expéditeur
+            bubble.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
             const expAvatar = localStorage.getItem(`avatar_${msg.expediteur}`) || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100";
 
             bubble.innerHTML = `
                 <div class="flex items-center gap-1.5 mb-0.5">
-                    ${!isMe ? `<img src="${expAvatar}" class="w-3.5 h-3.5 rounded-full object-cover">` : ''}
-                    <span class="text-[10px] text-gray-400 font-semibold">${msg.expediteur}</span>
+                    ${!isMe ? `<img src="${expAvatar}" class="w-4 h-4 rounded-full object-cover">` : ''}
+                    <span class="text-[10px] text-gray-400 font-bold">${msg.expediteur}</span>
                 </div>
-                <div class="max-w-[80%] rounded-2xl px-3.5 py-1.5 text-sm shadow-sm ${
-                    isMe ? 'bg-orange-500 text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-150 rounded-tl-none'
+                <div class="max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                    isMe ? 'bg-orange-500 text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none'
                 }">
                     ${msg.texte}
                 </div>
@@ -568,37 +587,47 @@
         async function envoyerMessage() {
             const input = document.getElementById("chat-input");
             const texte = input.value.trim();
-
             if (!texte) return;
             input.value = "";
 
-            const { error } = await supabase.from('messages').insert([
+            // Ajout visuel temporaire immédiat pour une interface ultra réactive
+            const tempId = 'temp-' + Date.now();
+            appendMessage({
+                id: tempId,
+                annonce_id: currentAnnonceId,
+                expediteur: currentUser,
+                texte: texte
+            });
+
+            const { error } = await supabaseClient.from('messages').insert([
                 { annonce_id: currentAnnonceId, expediteur: currentUser, texte: texte }
             ]);
 
             if (error) {
-                alert("Erreur d'envoi du message : " + error.message);
+                console.error("Erreur d'envoi Supabase :", error);
+                const tempBubble = document.getElementById(`msg-${tempId}`);
+                if (tempBubble) tempBubble.remove(); // Retire le faux message en cas d'erreur
+                alert("Échec de l'envoi du message.");
             }
         }
 
+        // --- ACCÈS AUX DISCUSSIONS GROUPÉES ---
         async function loadDiscussions() {
             const listDiv = document.getElementById("inbox-list");
             const noMsgDiv = document.getElementById("no-messages");
-            listDiv.innerHTML = "<p class='text-center text-gray-500 py-8'>Chargement de tes conversations...</p>";
+            listDiv.innerHTML = "<p class='text-center text-gray-500 py-8'>Recherche de tes conversations...</p>";
 
-            // 1. Récupérer toutes les annonces de la base de données
-            const { data: allAnnonces, error: errAnn } = await supabase.from('annonces').select('*');
-            // 2. Récupérer tous les messages échangés sur la plateforme
-            const { data: allMessages, error: errMsg } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+            const { data: allAnnonces } = await supabaseClient.from('annonces').select('*');
+            const { data: allMessages } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false });
 
-            if (errAnn || errMsg) {
+            if (!allAnnonces || !allMessages) {
                 listDiv.innerHTML = "<p class='text-center text-red-500 py-8'>Erreur réseau lors de l'accès aux messages.</p>";
                 return;
             }
 
             listDiv.innerHTML = "";
 
-            // On filtre pour trouver les annonces qui nous concernent (soit on est le vendeur, soit on est l'acheteur actif)
+            // On filtre les discussions de l'utilisateur (vendeur ou expéditeur d'un message sur l'annonce)
             const activeConvs = allAnnonces.filter(annonce => {
                 const amIVendeur = annonce.prenom === currentUser;
                 const didISendMsg = allMessages.some(m => m.annonce_id === annonce.id && m.expediteur === currentUser);
@@ -615,23 +644,23 @@
 
             activeConvs.forEach(annonce => {
                 const messagesDeCetteAnnonce = allMessages.filter(m => m.annonce_id === annonce.id);
-                const dernierMessage = messagesDeCetteAnnonce[0]; // Le plus récent
+                const dernierMessage = messagesDeCetteAnnonce[0]; // Plus récent
 
                 const card = document.createElement("div");
-                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-orange-300 transition duration-150 cursor-pointer flex justify-between items-center";
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-orange-400 transition duration-150 cursor-pointer flex justify-between items-center";
                 card.onclick = () => ouvrirChat(annonce.id, annonce.titre, annonce.prenom);
                 
                 card.innerHTML = `
-                    <div class="flex-grow">
+                    <div class="flex-grow min-w-0">
                         <div class="flex justify-between items-baseline mb-1">
-                            <span class="font-bold text-gray-800">${annonce.titre}</span>
-                            <span class="text-xs text-gray-400 font-semibold">Par : ${annonce.prenom}</span>
+                            <span class="font-bold text-gray-800 truncate pr-4">${annonce.titre}</span>
+                            <span class="text-[10px] text-gray-400 font-semibold flex-shrink-0">Vendeur : ${annonce.prenom}</span>
                         </div>
-                        <p class="text-sm text-gray-500 truncate max-w-[250px]">
+                        <p class="text-sm text-gray-500 truncate">
                             <strong class="text-gray-700">${dernierMessage.expediteur} :</strong> ${dernierMessage.texte}
                         </p>
                     </div>
-                    <div class="text-orange-500 font-black ml-4 text-lg">➔</div>
+                    <div class="text-orange-500 font-black ml-4 text-xl">➔</div>
                 `;
                 listDiv.appendChild(card);
             });
